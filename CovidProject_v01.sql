@@ -75,15 +75,15 @@ order by 2,3
 
 --JUSE CTE
 
-with PopvsVac (Continent, Location, Date, Population, New_vaccinations, RollingPeopleVaccinated) as 
+;with PopvsVac (Continent, Location, Date, Population, New_vaccinations, RollingPeopleVaccinated) as 
 (
-Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(CONVERT(int, vac.new_vaccinations)) OVER (Partition by dea.location order by dea.location, dea.Date) as RollingPeopleVaccinated--,(RollingPeopleVaccinated/Population)*100
+Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(CONVERT(bigint, vac.new_vaccinations)) OVER (Partition by dea.location order by dea.location, dea.Date) as RollingPeopleVaccinated--,(RollingPeopleVaccinated/Population)*100
 From CovidProject..Deaths dea
 join CovidProject..Vaccinations vac
 	on dea.location = vac.location
 	and dea.date = vac.date
 where dea.continent is not null
-order by 2,3
+--order by 2,3
 )
 Select *, (RollingPeopleVaccinated/Population)*100
 From PopvsVac
@@ -104,7 +104,7 @@ RollingPeopleVaccinated numeric
 )
 
 Insert into #PercentPopulationVaccinated
-Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(CONVERT(int, vac.new_vaccinations)) OVER (Partition by dea.location order by dea.location, dea.Date) as RollingPeopleVaccinated--,(RollingPeopleVaccinated/Population)*100
+Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(CONVERT(bigint, vac.new_vaccinations)) OVER (Partition by dea.location order by dea.location, dea.Date) as RollingPeopleVaccinated--,(RollingPeopleVaccinated/Population)*100
 From CovidProject..Deaths dea
 join CovidProject..Vaccinations vac
 	on dea.location = vac.location
@@ -119,6 +119,8 @@ From #PercentPopulationVaccinated
 
 
 --Creating view to store data for later visualization
+PRINT 'Creating PercentPopulationVaccinated View'
+GO
 
 Create View PercentPopulationVaccinated as
 Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(CONVERT(int, vac.new_vaccinations)) OVER (Partition by dea.location order by dea.location, dea.Date) as RollingPeopleVaccinated--,(RollingPeopleVaccinated/Population)*100
